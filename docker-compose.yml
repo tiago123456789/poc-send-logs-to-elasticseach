@@ -1,0 +1,100 @@
+version: '3'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms524m -Xmx524m"
+      - "http.publish_host=_local_"
+      - xpack.security.enabled=false
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - elastic
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - 5601:5601
+    networks:
+      - elastic
+
+  filebeat:
+    build:
+        context: ./filebeat
+    container_name: filebeat
+    command: filebeat -e -strict.perms=false
+    volumes:
+        - ./logs:/logs
+    depends_on:
+        - elasticsearch
+        - kibana
+    networks:
+      - elastic
+
+  nodejs-app:
+    build: .
+    container_name: nodejs-app
+    depends_on:
+      - elasticsearch
+    volumes:
+        - ./logs:/src/logs
+    networks:
+      - elastic
+
+  nodejs-app-2:
+    build: .
+    container_name: nodejs-app-2
+    command: node index2.js
+    depends_on:
+      - elasticsearch
+    volumes:
+        - ./logs:/src/logs
+    networks:
+      - elastic
+
+  golang-app:
+    build: 
+      context: .
+      dockerfile: DockerfileGo
+    container_name: golang-app
+    depends_on:
+      - elasticsearch
+    volumes:
+        - ./logs:/src/logs
+    networks:
+      - elastic
+
+  php-app:
+    build: 
+      context: ./php
+      dockerfile: DockerfilePhp
+    container_name: php-app
+    depends_on:
+      - elasticsearch
+    volumes:
+        - ./logs:/src/logs
+    networks:
+      - elastic
+
+networks:
+  elastic:
+    driver: bridge
+
+volumes:
+  esdata:
+    driver: local

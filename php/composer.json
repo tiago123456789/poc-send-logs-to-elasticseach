@@ -1,0 +1,18 @@
+{
+    "name": "tiago-notebook/poc-send-logs-to-elasticsearch",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "TiagoNotebook\\PocSendLogsToElasticsearch\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Tiago rosa da costa",
+            "email": "tiagorosadacost@gmail.com"
+        }
+    ],
+    "require": {
+        "monolog/monolog": "^2.9"
+    }
+}

@@ -1,0 +1,4 @@
+node_modules/
+php/vendor/
+logs/
+php/logs/

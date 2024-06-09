@@ -1,0 +1,19 @@
+# Use the official PHP image
+FROM php:8.1-cli
+
+# Set working directory
+WORKDIR /src
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+COPY composer.json composer.lock ./
+
+# Copy the application files
+COPY . .
+
+# Install project dependencies
+RUN composer install
+
+# Set the command to execute the PHP script
+CMD ["php", "index.php"]
